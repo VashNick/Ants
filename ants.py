@@ -71,6 +71,7 @@ class Place(object):
 
 class Insect(object):
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
+    watersafe=False    ####### VASH MOD ######
 
     def __init__(self, armor, place=None):
         """Create an Insect with an armor amount and a starting Place."""
@@ -111,6 +112,7 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
 
     name = 'Bee'
+    Watersafe=True   ##### VASH MOD #######
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -442,7 +444,10 @@ class Water(Place):
 
     def add_insect(self, insect):
         """Add insect if it is watersafe, otherwise reduce its armor to 0."""
-        "*** YOUR CODE HERE ***"
+        Place.add_insect(self,insect)
+        if not(insect.watersafe):
+            insect.reduce_armor(insect.armor)
+        ###### VASH MOD ########
 
 
 class FireAnt(Ant):
