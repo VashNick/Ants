@@ -1,3 +1,7 @@
+""" Finish Phase 1 by Friday Night and Phase2 by either Saturday or Sunday Night
+    Then work on the rest till Wednesday  -Vash"""
+
+
 """
 The ants module implements game logic for Ants Vs. SomeBees.
 Name:
