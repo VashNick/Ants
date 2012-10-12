@@ -459,11 +459,18 @@ class FireAnt(Ant):
 
     name = 'Fire'
     damage = 3
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost=4
+    implemented = True
 
     def reduce_armor(self, amount):
-        "*** YOUR CODE HERE ***"
+        temp=self.place.bees # Checks for all the bees in the same place as the fire ant
+        for bee in temp:
+            bee.reduce_armor(damage)
+            if bee.armor <=0:
+                temp.remove(bee)
+        self.place.bees=temp
+        Insect.reduce_armor(self,amount)
+        ####### VASH MOD ######
 
 
 class LongThrower(ThrowerAnt):
