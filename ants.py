@@ -205,7 +205,7 @@ class ThrowerAnt(Ant):
             new = self.place
             for _ in range(1, self.distance+1):
                 new = new.entrance
-                if new.bees:
+                if new.bees: ### STILL RAISES PROBLEMS, NOT VERY PRETTY
                     for bee in new.bees:
                         if bee not in hive.bees:
                             bees.append(bee)
@@ -534,8 +534,9 @@ class ScubaThrower(ThrowerAnt):
     """ScubaThrower is a ThrowerAnt which is watersafe."""
 
     name = 'Scuba'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 5
+    watersafe = True
+    implemented = True
 
 
 class HungryAnt(Ant):
@@ -543,19 +544,23 @@ class HungryAnt(Ant):
     While eating, the HungryAnt can't eat another Bee.
     """
     name = 'Hungry'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 4 ### MODED 
+    implemented = True ### MODED 
+    time_to_digest = 3 ### MODED 
 
     def __init__(self):
         Ant.__init__(self)
-        "*** YOUR CODE HERE ***"
+        self.digesting = 0 ## MODED
 
     def eat_bee(self, bee):
-        "*** YOUR CODE HERE ***"
+        self.digesting = 0 #### MODED
 
     def action(self, colony):
-        "*** YOUR CODE HERE ***"
-
+        if self.digesting < time_to_digest:
+            self.digesting += 1
+        else:
+            self.eat_bee(bee)
+        ### MODED
 
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
