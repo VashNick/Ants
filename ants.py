@@ -78,7 +78,7 @@ class Place(object):
 
 class Insect(object):
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
-    watersafe=False    ####### VASH MOD ######
+    watersafe = False    ####### VASH MOD ######
 
     def __init__(self, armor, place=None):
         """Create an Insect with an armor amount and a starting Place."""
@@ -119,7 +119,7 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
 
     name = 'Bee'
-    Watersafe=True   ##### VASH MOD #######
+    watersafe = True   ##### VASH MOD #######
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -203,8 +203,7 @@ class ThrowerAnt(Ant):
             if self.place.entrance.bees:
                 for bee in self.place.entrance.bees:
                     if bee not in hive.bees:
-                        return bee    ####### MODIFIED, NOT CORRECT YET
-
+                        return bee
 
         return random_or_none(self.place.bees)
 
@@ -455,7 +454,7 @@ class Water(Place):
     def add_insect(self, insect):
         """Add insect if it is watersafe, otherwise reduce its armor to 0."""
         Place.add_insect(self,insect)
-        if not(insect.watersafe):
+        if not insect.watersafe:
             insect.reduce_armor(insect.armor)
         ###### VASH MOD ########
 
@@ -464,14 +463,13 @@ class FireAnt(Ant):
     """FireAnt cooks any Bee in its Place when it expires."""
 
     name = 'Fire'
-    damage = 3
     food_cost=4
     implemented = True
 
-    def reduce_armor(self, amount):
-        temp=self.place.bees # Checks for all the bees in the same place as the fire ant
+    def reduce_armor(self):
+        temp = self.place.bees # Checks for all the bees in the same place as the fire ant
         for bee in temp:
-            bee.reduce_armor(damage)
+            bee.reduce_armor(3)
             if bee.armor <=0:
                 temp.remove(bee)
         self.place.bees=temp
