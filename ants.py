@@ -200,7 +200,11 @@ class ThrowerAnt(Ant):
         Problem B5: This method returns None if there is no Bee in range.
         """
         if not self.place.bees:
-            self.place = self.place.entrance #### MODIFIED, INCORRECT, CORRECTING IT
+            if self.place.entrance.bees:
+                for bee in self.place.entrance.bees:
+                    if bee not in hive.bees:
+                        return bee    ####### MODIFIED, NOT CORRECT YET
+
 
         return random_or_none(self.place.bees)
 
