@@ -1,13 +1,17 @@
-""" Finish Phase 1 by Friday Night and Phase2 by either Saturday or Sunday Night
-    Then work on the rest till Wednesday  -Vash"""
-
-
 """
 The ants module implements game logic for Ants Vs. SomeBees.
-Name:
+Name: 
+A: Vashisht
+B: Nicholas Osborne Hardison-Moschopoulos
 Login:
+A: CS61a-jt
+B: 
 TA:
+A: Allen Nguyen
+B: 
 Section:
+A: 128
+B: 
 """
 
 import random
@@ -36,9 +40,8 @@ class Place(object):
         self.ant = None       # An Ant
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
-        if exit != None:
-            exit = self.entrance 
-        ################## MODIFIED
+        if self.exit != None:   #### MODIFIED
+            self.exit.entrance = self   #### MODIFIED
 
     def add_insect(self, insect):
         """Add an Insect to this Place.
@@ -166,16 +169,14 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
-    food_cost = 2
-    ########### MODIFIED
+    food_cost = 2  #### MODIFIED
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
 
         colony -- The AntColony, used to access game state information.
         """
-        colony.food += 1
-        ############### MODIFIED
+        colony.food += 1  #### MODIFIED
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -188,8 +189,7 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
-    food_cost = 4
-    ############ MODIFIED
+    food_cost = 4 #### MODIFIED
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -199,7 +199,9 @@ class ThrowerAnt(Ant):
 
         Problem B5: This method returns None if there is no Bee in range.
         """
-        "*** YOUR CODE HERE ***"
+        if not self.place.bees:
+            self.place = self.place.entrance #### MODIFIED, INCORRECT, CORRECTING IT
+
         return random_or_none(self.place.bees)
 
     def throw_at(self, target):
