@@ -463,16 +463,14 @@ class FireAnt(Ant):
     """FireAnt cooks any Bee in its Place when it expires."""
 
     name = 'Fire'
+    damage=3
     food_cost=4
     implemented = True
 
     def reduce_armor(self):
-        temp = self.place.bees # Checks for all the bees in the same place as the fire ant
-        for bee in temp:
-            bee.reduce_armor(3)
-            if bee.armor <=0:
-                temp.remove(bee)
-        self.place.bees=temp
+        temp = list(self.place.bees) # Checks for all the bees in the same place as the fire ant
+        for x in range(len(temp)):
+            temp[x].reduce_armor(self.damage)
         Insect.reduce_armor(self,amount)
         ####### VASH MOD ######
 
