@@ -191,7 +191,7 @@ class ThrowerAnt(Ant):
     damage = 1
     min_range = 0 ## MODED
     max_range = 10 ## MODED
-    food_cost = 0 #### MODIFIED
+    food_cost = 4 #### MODIFIED
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -203,14 +203,13 @@ class ThrowerAnt(Ant):
         """
         bees = []
         new = self.place
-        for i in range(self.min_range, self.max_range+1):
+        for _ in range(0, self.min_range):
+            new = new.entrance
+        for _ in range(self.min_range, self.max_range+1):
             if new.name != 'Hive':
-                if new.bees: 
-                    for bee in new.bees: ### STILL RAISES PROBLEM WITH 4+ ANTS
-                    # print (str(bee.place) == 'Hive')
-                        # print (self, i, bee, hive.bees)
-                        if bee not in hive.bees:
-                            bees.append(bee)
+                if new.bees:
+                    for bee in new.bees:
+                        bees.append(bee)
                     return random_or_none(bees)
                 else:
                     new = new.entrance
@@ -551,8 +550,8 @@ class HungryAnt(Ant):
         self.digesting = 0 ## MODED
 
     def eat_bee(self, bee):
-        if self.place.bees:
-            self.digesting = 3 #### MODED
+        if bee:
+            self.digesting = self.time_to_digest #### MODED
             bee.reduce_armor(bee.armor)
 
     def action(self, colony):
@@ -565,15 +564,15 @@ class HungryAnt(Ant):
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
     name = 'Bodyguard'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 4 ## MODED
+    implemented = True
 
     def __init__(self):
         Ant.__init__(self, 2)
         self.ant = None  # The Ant hidden in this bodyguard
 
     def contain_ant(self, ant):
-        "*** YOUR CODE HERE ***"
+        self.ant = ant
 
     def reduce_armor(self, amount):
         "*** YOUR CODE HERE ***"
