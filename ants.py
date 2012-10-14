@@ -189,8 +189,9 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
-    distance = 10 ## MODED
-    food_cost = 4 #### MODIFIED
+    min_range = 0 ## MODED
+    max_range = 10 ## MODED
+    food_cost = 0 #### MODIFIED
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -202,13 +203,18 @@ class ThrowerAnt(Ant):
         """
         bees = []
         new = self.place
-        for _ in range(self.min_range, self.max_range+1):
-            new = new.entrance
-            if new.bees: ### STILL RAISES PROBLEMS, NOT VERY PRETTY
-                for bee in new.bees:
-                    if bee not in hive.bees:
-                        bees.append(bee)
-                return random_or_none(bees)
+        for i in range(self.min_range, self.max_range+1):
+            if new.name != 'Hive':
+                if new.bees: 
+                    for bee in new.bees: ### STILL RAISES PROBLEM WITH 4+ ANTS
+                    # print (str(bee.place) == 'Hive')
+                        # print (self, i, bee, hive.bees)
+                        if bee not in hive.bees:
+                            bees.append(bee)
+                    return random_or_none(bees)
+                else:
+                    new = new.entrance
+            
         ### MODED
 
         # return random_or_none(self.place.bees)
@@ -228,7 +234,6 @@ class Hive(Place):
 
     assault_plan -- An AssaultPlan; when & where bees enter the colony.
     """
-
     name = 'Hive'
 
     def __init__(self, assault_plan):
@@ -486,8 +491,7 @@ class LongThrower(ThrowerAnt):
 
     name = 'Long'
     food_cost = 3 #### MODED
-    min_range = 3
-    max_range = 4 ### MODED
+    min_range = 4 ### MODED
     implemented = True
 
 
@@ -496,7 +500,6 @@ class ShortThrower(ThrowerAnt):
 
     name = 'Short'
     food_cost = 3  #### MODED
-    min_range = 1
     max_range = 2 ### MODED 
     implemented = True
 
@@ -557,6 +560,7 @@ class HungryAnt(Ant):
             self.digesting -= 1
         else:
             self.eat_bee(random_or_none(self.place.bees))
+        ### MODED
 
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
