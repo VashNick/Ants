@@ -553,14 +553,15 @@ class HungryAnt(Ant):
         self.digesting = 0 ## MODED
 
     def eat_bee(self, bee):
-        self.digesting = 0 #### MODED
+        if self.place.bees:
+            self.digesting = 3 #### MODED
+            bee.reduce_armor(bee.armor)
 
     def action(self, colony):
-        if self.digesting < time_to_digest:
-            self.digesting += 1
+        if self.digesting:
+            self.digesting -= 1
         else:
-            self.eat_bee(bee)
-        ### MODED
+            self.eat_bee(random_or_none(self.place.bees))
 
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
