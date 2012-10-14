@@ -201,21 +201,14 @@ class ThrowerAnt(Ant):
         Problem B5: This method returns None if there is no Bee in range.
         """
         bees = []
-        if not self.place.bees:
-            new = self.place
-            for _ in range(1, self.distance+1):
-                new = new.entrance
-                if new.bees: ### STILL RAISES PROBLEMS, NOT VERY PRETTY
-                    for bee in new.bees:
-                        if bee not in hive.bees:
-                            bees.append(bee)
-                    return random_or_none(bees)
-        else:
-            for bee in self.place.bees:
-                if bee not in hive.bees:
-                    bees.append(bee)
-            return random_or_none(bees)
-
+        new = self.place
+        for _ in range(self.min_range, self.max_range+1):
+            new = new.entrance
+            if new.bees: ### STILL RAISES PROBLEMS, NOT VERY PRETTY
+                for bee in new.bees:
+                    if bee not in hive.bees:
+                        bees.append(bee)
+                return random_or_none(bees)
         ### MODED
 
         # return random_or_none(self.place.bees)
@@ -493,7 +486,8 @@ class LongThrower(ThrowerAnt):
 
     name = 'Long'
     food_cost = 3 #### MODED
-    distance = 4 ### MODED
+    min_range = 3
+    max_range = 4 ### MODED
     implemented = True
 
 
@@ -502,7 +496,8 @@ class ShortThrower(ThrowerAnt):
 
     name = 'Short'
     food_cost = 3  #### MODED
-    distance = 2 ### MODED 
+    min_range = 1
+    max_range = 2 ### MODED 
     implemented = True
 
 
