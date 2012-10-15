@@ -133,7 +133,8 @@ class Bee(Insect):
     def blocked(self):
         """Return True if this Bee cannot advance to the next Place."""
         # Phase 2: Special handling for NinjaAnt
-        "*** YOUR CODE HERE ***"
+        if self.place.ant == None or not self.place.ant.blocks_path:
+            return False
         return self.place.ant is not None
 
     def action(self, colony):
@@ -155,6 +156,8 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     damage = 0
     food_cost = 0
+    blocks_path = True
+    container = False ## MODED
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -162,6 +165,11 @@ class Ant(Insect):
 
     def is_ant(self):
         return True
+
+    def can_contain(self, other):
+        if self.container == True and self.ant == None and other.container == False:
+            return True
+    ## MODED
 
 
 class HarvesterAnt(Ant):
@@ -481,7 +489,6 @@ class FireAnt(Ant):
         temp = list(self.place.bees) # Checks for all the bees in the same place as the fire ant
         for x in range(len(temp)):
             temp[x].reduce_armor(self.damage)
-        self.place.bees = temp
         Insect.reduce_armor(self, amount)
         ####### VASH MOD ######
 
@@ -507,12 +514,11 @@ class WallAnt(Ant):
     """WallAnt is an Ant which has a large amount of armor."""
 
     name = 'Wall'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 4
+    implemented = True
 
     def __init__(self):
-        "*** YOUR CODE HERE ***"
-        Ant.__init__(self)
+        Ant.__init__(self, 4)
 
 
 class NinjaAnt(Ant):
@@ -520,11 +526,15 @@ class NinjaAnt(Ant):
     all Bees in the exact same Place."""
 
     name = 'Ninja'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 6
+    damage = 1
+    blocks_path = False
+    implemented = True
 
     def action(self, colony):
-        "*** YOUR CODE HERE ***"
+        temp = list(self.place.bees)
+        for i in range(len(temp)):
+            temp[i].reduce_armor(self.damage)
 
 
 class ScubaThrower(ThrowerAnt):
@@ -563,9 +573,11 @@ class HungryAnt(Ant):
 
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
+    
     name = 'Bodyguard'
-    food_cost = 4 ## MODED
+    food_cost = 0 ## MODED
     implemented = True
+    container = True
 
     def __init__(self):
         Ant.__init__(self, 2)
