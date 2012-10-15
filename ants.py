@@ -54,9 +54,16 @@ class Place(object):
         """
         if insect.is_ant():
             # Phase 2: Special handling for BodyguardAnt
-            "*** YOUR CODE HERE ***"
-            assert self.ant is None, 'Two ants in {0}'.format(self)
-            self.ant = insect
+            if self.ant != None:
+                if self.ant.can_contain(insect):
+                    self.ant.contain_ant(insect)
+                elif insect.can_contain(self.ant):
+                    insect.contain_ant(self.ant)
+                    self.ant = insect
+                else:
+                    assert self.ant is None, 'Two ants in {0}'.format(self)
+            else:
+                self.ant = insect
         else:
             self.bees.append(insect)
         insect.place = self
@@ -209,22 +216,16 @@ class ThrowerAnt(Ant):
 
         Problem B5: This method returns None if there is no Bee in range.
         """
-        bees = []
         new = self.place
         for _ in range(0, self.min_range):
             new = new.entrance
         for _ in range(self.min_range, self.max_range+1):
             if new.name != 'Hive':
                 if new.bees:
-                    for bee in new.bees:
-                        bees.append(bee)
-                    return random_or_none(bees)
+                    return random_or_none(new.bees)
                 else:
                     new = new.entrance
-            
         ### MODED
-
-        # return random_or_none(self.place.bees)
 
     def throw_at(self, target):
         """Throw a leaf at the target Bee, reducing its armor."""
@@ -575,7 +576,7 @@ class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
     
     name = 'Bodyguard'
-    food_cost = 0 ## MODED
+    food_cost = 4 ## MODED
     implemented = True
     container = True
 
@@ -587,27 +588,37 @@ class BodyguardAnt(Ant):
         self.ant = ant
 
     def reduce_armor(self, amount):
-        "*** YOUR CODE HERE ***"
+        self.armor -= amount
+        if self.armor <= 0:
+            self.place.ant = self.ant
 
     def action(self, colony):
-        "*** YOUR CODE HERE ***"
+        if self.ant != None:
+            self.ant.action(colony)
 
 
 class QueenAnt(ThrowerAnt):
     """The Queen of the colony.  The game is over if a bee enters her place."""
 
     name = 'Queen'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 2
+    implemented = True
+    created = 0
 
     def __init__(self):
         ThrowerAnt.__init__(self, 1)  #
-        "*** YOUR CODE HERE ***"
+        self.created += 1
+
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damange of ants
         behind her.  Imposter queens do only one thing: die."""
-        "*** YOUR CODE HERE ***"
+        if self.created:
+            self.armor = 0
+
+class QueenPlace(Place):
+    Old_Queen = Place('AntQueen')
+    New_Queen = Place('Queen')
 
 class AntRemover(Ant):
     """Allows the player to remove ants from the board in the GUI."""
@@ -628,7 +639,10 @@ def make_slow(action):
 
     action -- An action method of some Bee
     """
-    "*** YOUR CODE HERE ***"
+    def new(self, colony):
+        if colony.time % 2 == 0:
+            action(self, colony)
+    return new
 
 def make_stun(action):
     """Return a new action method that does nothing.
@@ -639,15 +653,23 @@ def make_stun(action):
 
 def apply_effect(effect, bee, duration):
     """Apply a status effect to a Bee that lasts for duration turns."""
-    "*** YOUR CODE HERE ***"
+    # act = bee.action
+    # def nested(self, colony):
+    #     nonlocal duration
+    #     duration -= 1
+    #     if duration:
+    #         bee.action = effect(bee.action)(self, colony)
+    #     else:
+    #         bee.action = act
+    # return nested(bee, AntColony)
 
 
 class SlowThrower(ThrowerAnt):
     """ThrowerAnt that causes Slow on Bees."""
 
     name = 'Slow'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 4
+    implemented = True
 
     def throw_at(self, target):
         if target:
@@ -658,8 +680,8 @@ class StunThrower(ThrowerAnt):
     """ThrowerAnt that causes Stun on Bees."""
 
     name = 'Stun'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 6
+    implemented = True
 
     def throw_at(self, target):
         if target:
