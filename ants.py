@@ -1,17 +1,17 @@
 """
 The ants module implements game logic for Ants Vs. SomeBees.
-Name: 
+Name:
 A: Vashisht
 B: Nicholas Osborne Hardison-Moschopoulos
 Login:
 A: CS61a-jt
-B: 
-TA:
+B: cs61a-dt
+TA: 
 A: Allen Nguyen
-B: 
+B:Joy Jeng
 Section:
 A: 128
-B: 
+B: 123
 """
 
 import random
@@ -31,27 +31,27 @@ class Place(object):
     def __init__(self, name, exit=None):
         """Create a Place with the given exit.
 
-        name -- A string; the name of this Place.
-        exit -- The Place reached by exiting this Place (may be None).
-        """
+name -- A string; the name of this Place.
+exit -- The Place reached by exiting this Place (may be None).
+"""
         self.name = name
         self.exit = exit
-        self.bees = []        # A list of Bees
-        self.ant = None       # An Ant
-        self.entrance = None  # A Place
+        self.bees = [] # A list of Bees
+        self.ant = None # An Ant
+        self.entrance = None # A Place
         # Phase 1: Add an entrance to the exit
-        if self.exit != None:   #### MODIFIED
-            self.exit.entrance = self   #### MODIFIED
+        if self.exit != None: #### MODIFIED
+            self.exit.entrance = self #### MODIFIED
 
     def add_insect(self, insect):
         """Add an Insect to this Place.
 
-        There can be at most one Ant in a Place, unless exactly one of them is
-        a BodyguardAnt (Phase 2), in which case there can be two. If add_insect
-        tries to add more Ants than is allowed, an assertion error is raised.
+There can be at most one Ant in a Place, unless exactly one of them is
+a BodyguardAnt (Phase 2), in which case there can be two. If add_insect
+tries to add more Ants than is allowed, an assertion error is raised.
 
-        There can be any number of Bees in a Place.
-        """
+There can be any number of Bees in a Place.
+"""
         if insect.is_ant():
             # Phase 2: Special handling for BodyguardAnt
             if self.ant != None:
@@ -75,9 +75,10 @@ class Place(object):
         else:
             assert self.ant == insect, '{0} is not in {1}'.format(insect, self)
             "*** YOUR CODE HERE ***"
-            self.ant = None
-
-        insect.place = None
+            if insect.created!=1:
+                self.ant = None
+        if insect.created!=1:
+            insect.place = None
 
     def __str__(self):
         return self.name
@@ -85,23 +86,23 @@ class Place(object):
 
 class Insect(object):
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
-    watersafe = False    ####### VASH MOD ######
+    watersafe = False ####### VASH MOD ######
 
     def __init__(self, armor, place=None):
         """Create an Insect with an armor amount and a starting Place."""
         self.armor = armor
-        self.place = place  # set by Place.add_insect and Place.remove_insect
+        self.place = place # set by Place.add_insect and Place.remove_insect
 
 
     def reduce_armor(self, amount):
         """Reduce armor by amount, and remove the insect from its place if it
-        has no armor remaining.
+has no armor remaining.
 
-        >>> test_insect = Insect(5)
-        >>> test_insect.reduce_armor(2)
-        >>> test_insect.armor
-        3
-        """
+>>> test_insect = Insect(5)
+>>> test_insect.reduce_armor(2)
+>>> test_insect.armor
+3
+"""
         self.armor -= amount
         if self.armor <= 0:
             print('{0} ran out of armor and expired'.format(self))
@@ -110,8 +111,8 @@ class Insect(object):
     def action(self, colony):
         """Perform the default action that this Insect takes each turn.
 
-        colony -- The AntColony, used to access game state information.
-        """
+colony -- The AntColony, used to access game state information.
+"""
 
     def is_ant(self):
         """Return whether this Insect is an Ant."""
@@ -126,7 +127,8 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
 
     name = 'Bee'
-    watersafe = True   ##### VASH MOD #######
+    watersafe = True ##### VASH MOD #######
+    created=0
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -146,10 +148,10 @@ class Bee(Insect):
 
     def action(self, colony):
         """A Bee's action stings the Ant that blocks its exit if it is blocked,
-        or moves to the exit of its current place otherwise.
+or moves to the exit of its current place otherwise.
 
-        colony -- The AntColony, used to access game state information.
-        """
+colony -- The AntColony, used to access game state information.
+"""
         if self.blocked():
             self.sting(self.place.ant)
         else:
@@ -160,11 +162,12 @@ class Bee(Insect):
 class Ant(Insect):
     """An Ant occupies a place and does work for the colony."""
 
-    implemented = False  # Only implemented Ant classes should be instantiated
+    implemented = False # Only implemented Ant classes should be instantiated
     damage = 0
     food_cost = 0
     blocks_path = True
     container = False ## MODED
+    created=0
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -184,14 +187,14 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
-    food_cost = 2  #### MODIFIED
+    food_cost = 2 #### MODIFIED
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
 
-        colony -- The AntColony, used to access game state information.
-        """
-        colony.food += 1  #### MODIFIED
+colony -- The AntColony, used to access game state information.
+"""
+        colony.food += 1 #### MODIFIED
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -210,12 +213,12 @@ class ThrowerAnt(Ant):
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
-        the ThrowerAnt's Place by following entrances.
+the ThrowerAnt's Place by following entrances.
 
-        This method returns None if there is no such Bee.
+This method returns None if there is no such Bee.
 
-        Problem B5: This method returns None if there is no Bee in range.
-        """
+Problem B5: This method returns None if there is no Bee in range.
+"""
         new = self.place
         for _ in range(0, self.min_range):
             new = new.entrance
@@ -240,8 +243,8 @@ class ThrowerAnt(Ant):
 class Hive(Place):
     """The Place from which the Bees launch their assault.
 
-    assault_plan -- An AssaultPlan; when & where bees enter the colony.
-    """
+assault_plan -- An AssaultPlan; when & where bees enter the colony.
+"""
     name = 'Hive'
 
     def __init__(self, assault_plan):
@@ -264,22 +267,22 @@ class Hive(Place):
 class AntColony(object):
     """An ant collective that manages global game state and simulates time.
 
-    Attributes:
-    time -- elapsed time
-    food -- the colony's available food total
-    queen -- the place where the queen resides
-    places -- A list of all places in the colony (including a Hive)
-    bee_entrances -- A list of places that bees can enter
-    """
+Attributes:
+time -- elapsed time
+food -- the colony's available food total
+queen -- the place where the queen resides
+places -- A list of all places in the colony (including a Hive)
+bee_entrances -- A list of places that bees can enter
+"""
     def __init__(self, strategy, hive, ant_types, create_places, food=4):
         """Create an AntColony for simulating a game.
 
-        Arguments:
-        strategy -- a function to deploy ants to places
-        hive -- a Hive full of bees
-        ant_types -- a list of ant constructors
-        create_places -- a function that creates the set of places
-        """
+Arguments:
+strategy -- a function to deploy ants to places
+hive -- a Hive full of bees
+ant_types -- a list of ant constructors
+create_places -- a function that creates the set of places
+"""
         self.time = 0
         self.food = food
         self.strategy = strategy
@@ -303,12 +306,12 @@ class AntColony(object):
     def simulate(self):
         """Simulate an attack on the ant colony (i.e., play the game)."""
         while len(self.queen.bees) == 0 and len(self.bees) > 0:
-            self.hive.strategy(self)    # Bees invade
-            self.strategy(self)         # Ants deploy
-            for ant in self.ants:       # Ants take actions
+            self.hive.strategy(self) # Bees invade
+            self.strategy(self) # Ants deploy
+            for ant in self.ants: # Ants take actions
                 if ant.armor > 0:
                     ant.action(self)
-            for bee in self.bees:       # Bees take actions
+            for bee in self.bees: # Bees take actions
                 if bee.armor > 0:
                     bee.action(self)
             self.time += 1
@@ -320,8 +323,8 @@ class AntColony(object):
     def deploy_ant(self, place_name, ant_type_name):
         """Place an ant if enough food is available.
 
-        This method is called by the current strategy to deploy ants.
-        """
+This method is called by the current strategy to deploy ants.
+"""
         constructor = self.ant_types[ant_type_name]
         if self.food < constructor.food_cost:
             print('Not enough food remains to place ' + ant_type_name)
@@ -362,24 +365,24 @@ def ant_types():
 
 def interactive_strategy(colony):
     """A strategy that starts an interactive session and lets the user make
-    changes to the colony.
+changes to the colony.
 
-    For example, one might deploy a ThrowerAnt to the first tunnel by invoking:
-    colony.deploy_ant('tunnel_0_0', 'Thrower')
-    """
+For example, one might deploy a ThrowerAnt to the first tunnel by invoking:
+colony.deploy_ant('tunnel_0_0', 'Thrower')
+"""
     print('colony: ' + str(colony))
     msg = '<Control>-D (<Control>-Z <Enter> on Windows) completes a turn.\n'
     interact(msg)
 
 def start_with_strategy(args, strategy):
     usage = """python3 [ants.py|ants_gui.py] [OPTIONS]
-    Run the Ants vs. SomeBees project.
+Run the Ants vs. SomeBees project.
 
-    -h, --help      Prints this help message
-    -f, --full      Loads a full layout and assault plan
-    -w, --water     Loads a full map with water.
-    -i, --insane    Loads an insane assault plan. Good luck!
-    """
+-h, --help Prints this help message
+-f, --full Loads a full layout and assault plan
+-w, --water Loads a full map with water.
+-i, --insane Loads an insane assault plan. Good luck!
+"""
     if "-h" in args or "--help" in args:
         print(usage)
         return
@@ -423,13 +426,13 @@ def dry_layout(queen, register_place, length=8, tunnels=3):
 
 
 class AssaultPlan(dict):
-    """The Bees' plan of attack for the Colony.  Attacks come in timed waves.
+    """The Bees' plan of attack for the Colony. Attacks come in timed waves.
 
-    An AssaultPlan is a dictionary from times (int) to waves (list of Bees).
+An AssaultPlan is a dictionary from times (int) to waves (list of Bees).
 
-    >>> AssaultPlan().add_wave(4, 2)
-    {4: [Bee(3, None), Bee(3, None)]}
-    """
+>>> AssaultPlan().add_wave(4, 2)
+{4: [Bee(3, None), Bee(3, None)]}
+"""
 
     def __init__(self, bee_armor=3):
         self.bee_armor = bee_armor
@@ -506,8 +509,8 @@ class ShortThrower(ThrowerAnt):
     """A ThrowerAnt that only throws leaves at Bees within 3 places."""
 
     name = 'Short'
-    food_cost = 3  #### MODED
-    max_range = 2 ### MODED 
+    food_cost = 3 #### MODED
+    max_range = 2 ### MODED
     implemented = True
 
 
@@ -524,7 +527,7 @@ class WallAnt(Ant):
 
 class NinjaAnt(Ant):
     """NinjaAnt is an Ant which does not block the path and does 1 damage to
-    all Bees in the exact same Place."""
+all Bees in the exact same Place."""
 
     name = 'Ninja'
     food_cost = 6
@@ -549,12 +552,12 @@ class ScubaThrower(ThrowerAnt):
 
 class HungryAnt(Ant):
     """HungryAnt will take three "turns" to eat a Bee in the same space as it.
-    While eating, the HungryAnt can't eat another Bee.
-    """
+While eating, the HungryAnt can't eat another Bee.
+"""
     name = 'Hungry'
-    food_cost = 4 ### MODED 
-    implemented = True ### MODED 
-    time_to_digest = 3 ### MODED 
+    food_cost = 4 ### MODED
+    implemented = True ### MODED
+    time_to_digest = 3 ### MODED
 
     def __init__(self):
         Ant.__init__(self)
@@ -582,7 +585,7 @@ class BodyguardAnt(Ant):
 
     def __init__(self):
         Ant.__init__(self, 2)
-        self.ant = None  # The Ant hidden in this bodyguard
+        self.ant = None # The Ant hidden in this bodyguard
 
     def contain_ant(self, ant):
         self.ant = ant
@@ -598,7 +601,7 @@ class BodyguardAnt(Ant):
 
 
 class QueenAnt(ThrowerAnt):
-    """The Queen of the colony.  The game is over if a bee enters her place."""
+    """The Queen of the colony. The game is over if a bee enters her place."""
 
     name = 'Queen'
     food_cost = 2
@@ -606,19 +609,24 @@ class QueenAnt(ThrowerAnt):
     created = 0
 
     def __init__(self):
-        ThrowerAnt.__init__(self, 1)  #
-        self.created += 1
-
+        ThrowerAnt.__init__(self, 1) 
+        QueenAnt.created += 1
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damange of ants
-        behind her.  Imposter queens do only one thing: die."""
-        if self.created:
-            self.armor = 0
+behind her. Imposter queens do only one thing: die."""
+        if self.created > 1:
+            self.reduce_armor(self.armor)
+            QueenAnt.created-=1
 
 class QueenPlace(Place):
-    Old_Queen = Place('AntQueen')
-    New_Queen = Place('Queen')
+
+    @property     ### NEW #####
+    def bees(self):
+        for s in self.bees:
+            if (s==colony.queen) or (s==QueenAnt.place):
+                self.bees.remove(s)
+
 
 class AntRemover(Ant):
     """Allows the player to remove ants from the board in the GUI."""
@@ -637,8 +645,8 @@ class AntRemover(Ant):
 def make_slow(action):
     """Return a new action method that calls action every other turn.
 
-    action -- An action method of some Bee
-    """
+action -- An action method of some Bee
+"""
     def new(self, colony):
         if colony.time % 2 == 0:
             action(self, colony)
@@ -647,20 +655,20 @@ def make_slow(action):
 def make_stun(action):
     """Return a new action method that does nothing.
 
-    action -- An action method of some Bee
-    """
+action -- An action method of some Bee
+"""
     "*** YOUR CODE HERE ***"
 
 def apply_effect(effect, bee, duration):
     """Apply a status effect to a Bee that lasts for duration turns."""
     # act = bee.action
     # def nested(self, colony):
-    #     nonlocal duration
-    #     duration -= 1
-    #     if duration:
-    #         bee.action = effect(bee.action)(self, colony)
-    #     else:
-    #         bee.action = act
+    # nonlocal duration
+    # duration -= 1
+    # if duration:
+    # bee.action = effect(bee.action)(self, colony)
+    # else:
+    # bee.action = act
     # return nested(bee, AntColony)
 
 
@@ -690,3 +698,5 @@ class StunThrower(ThrowerAnt):
 @main
 def run(*args):
     start_with_strategy(args, interactive_strategy)
+
+
