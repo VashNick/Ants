@@ -619,12 +619,11 @@ class QueenAnt(ThrowerAnt):
             self.reduce_armor(self.armor)
             QueenAnt.created -= 1
 
-        colony.queen = self.place
+        colony.queen = QueenPlace(colony.queen, self.place)
 
         new = self.place.exit
         while new != None:
             if new.ant:
-                print(new.ant.damage)
                 if new.ant.buffed == False:
                     new.ant.damage = new.ant.damage*2
                     new.ant.buffed = True
@@ -635,12 +634,16 @@ class QueenAnt(ThrowerAnt):
 
 class QueenPlace(Place):
 
+    def __init__(self, queen_original_colony, queenplace):
+        self.queenplace = queenplace
+        self.queencolony = queen_original_colony
+
     @property
-    def bees(self, colony):
+    def bees(self):
         list_of_bees = []
-        if self.place.bees or colony.queen.bees:
-            list_of_bees += self.place.bees
-            list_of_bees += colony.queen.bees
+        if self.queenplace.bees or self.queencolony.bees:
+            list_of_bees += self.queenplace.bees
+            list_of_bees += self.queencolony.bees
         return list_of_bees
 
 class AntRemover(Ant):
