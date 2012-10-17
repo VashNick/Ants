@@ -73,12 +73,11 @@ class Place(object):
         if not insect.is_ant():
             self.bees.remove(insect)
         else:
-            assert self.ant == insect, '{0} is not in {1}'.format(insect, self)    
-            if insect.created==False:
-                self.ant = None
-
-        if insect.created==False:
-            insect.place = None
+            assert self.ant == insect, '{0} is not in {1}'.format(insect, self)
+            if hasattr(insect, 'created') and insect.created == False:
+                return
+            self.ant = None
+        insect.place = None 
 
     def __str__(self):
         return self.name
@@ -87,7 +86,7 @@ class Place(object):
 class Insect(object):
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
     
-    watersafe = False    ####### VASH MOD ######
+    watersafe = False
     buffed = False
 
     def __init__(self, armor, place=None):
@@ -130,7 +129,6 @@ class Bee(Insect):
 
     name = 'Bee'
     watersafe = True   ##### VASH MOD #######
-    created=False
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -169,7 +167,6 @@ class Ant(Insect):
     food_cost = 0
     blocks_path = True
     container = False ## MODED
-    created=False
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -606,32 +603,37 @@ class QueenAnt(ThrowerAnt):
     """The Queen of the colony.  The game is over if a bee enters her place."""
 
     name = 'Queen'
-    food_cost = 2
-    implemented = True
+    food_cost = 0
     created = False
+    implemented = True
 
     def __init__(self):
-        Ant.__init__(self, 1)  #
-        self.created= QueenAnt.created
-        if self.created==False:
-            QueenAnt.created=True
+        ThrowerAnt.__init__(self, 1)
+        self.created = QueenAnt.created
+        if not self.created:
+            QueenAnt.created = True
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damange of ants
         behind her.  Imposter queens do only one thing: die."""
-        if self.created==True:
+        if self.created:
             self.reduce_armor(self.armor)
-        if self.place !=None:
-            colony.queen = QueenPlace(colony.queen, self.place)
-            new = self.place.exit
-            while new != None:
-                if new.ant:
-                    if new.ant.buffed == False:
-                        new.ant.damage = new.ant.damage*2
-                        new.ant.buffed = True
-                new = new.exit
-
+        
+        if self.place != None:
             ThrowerAnt.action(self, colony)
+            colony.queen = QueenPlace(colony.queen, self.place)
+
+        new = self.place
+
+        if new != None:
+            new = self.place.exit
+
+        while new != None:
+            if new.ant:
+                if new.ant.buffed == False:
+                    new.ant.damage = new.ant.damage*2
+                    new.ant.buffed = True
+            new = new.exit
 
 
 class QueenPlace(Place):
@@ -667,29 +669,32 @@ def make_slow(action):
 
     action -- An action method of some Bee
     """
-    def new(self, colony):
+    def second(self, colony):
         if colony.time % 2 == 0:
-            action(self, colony)
-    return new
+            action(colony)
+    return second
 
 def make_stun(action):
     """Return a new action method that does nothing.
 
     action -- An action method of some Bee
     """
-    "*** YOUR CODE HERE ***"
+    def new_action(self, colony):
+        return 
+    return new_action
 
 def apply_effect(effect, bee, duration):
     """Apply a status effect to a Bee that lasts for duration turns."""
-    # act = bee.action
-    # def nested(self, colony):
-    #     nonlocal duration
-    #     duration -= 1
-    #     if duration:
-    #         bee.action = effect(bee.action)(self, colony)
-    #     else:
-    #         bee.action = act
-    # return nested(bee, AntColony)
+    act = bee.action
+    def first(colony):
+        nonlocal duration
+        if duration:
+            duration = duration - 1
+            effect(act)(bee, colony)
+        else:
+            act(colony)
+
+    bee.action = first
 
 
 class SlowThrower(ThrowerAnt):
