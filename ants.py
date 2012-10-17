@@ -618,18 +618,18 @@ class QueenAnt(ThrowerAnt):
         if self.created > 1:
             self.reduce_armor(self.armor)
             QueenAnt.created -= 1
+        if self.place !=None:
+            colony.queen = QueenPlace(colony.queen, self.place)
 
-        colony.queen = QueenPlace(colony.queen, self.place)
+            new = self.place.exit
+            while new != None:
+                if new.ant:
+                    if new.ant.buffed == False:
+                        new.ant.damage = new.ant.damage*2
+                        new.ant.buffed = True
+                new = new.exit
 
-        new = self.place.exit
-        while new != None:
-            if new.ant:
-                if new.ant.buffed == False:
-                    new.ant.damage = new.ant.damage*2
-                    new.ant.buffed = True
-            new = new.exit
-
-        ThrowerAnt.action(self, colony)
+            ThrowerAnt.action(self, colony)
 
 
 class QueenPlace(Place):
