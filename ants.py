@@ -73,11 +73,12 @@ class Place(object):
         if not insect.is_ant():
             self.bees.remove(insect)
         else:
-            assert self.ant == insect, '{0} is not in {1}'.format(insect, self)
-            if insect.created != 1:
+            assert self.ant == insect, '{0} is not in {1}'.format(insect, self)    
+            if insect.created==False:
                 self.ant = None
-        # if insect.created != 1:
-        insect.place = None
+
+        if insect.created==False:
+            insect.place = None
 
     def __str__(self):
         return self.name
@@ -87,7 +88,6 @@ class Insect(object):
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
     
     watersafe = False    ####### VASH MOD ######
-    created = 0
     buffed = False
 
     def __init__(self, armor, place=None):
@@ -130,6 +130,7 @@ class Bee(Insect):
 
     name = 'Bee'
     watersafe = True   ##### VASH MOD #######
+    created=False
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -168,6 +169,7 @@ class Ant(Insect):
     food_cost = 0
     blocks_path = True
     container = False ## MODED
+    created=False
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -604,23 +606,23 @@ class QueenAnt(ThrowerAnt):
     """The Queen of the colony.  The game is over if a bee enters her place."""
 
     name = 'Queen'
-    food_cost = 0
+    food_cost = 2
     implemented = True
-    created = 0
+    created = False
 
     def __init__(self):
-        ThrowerAnt.__init__(self, 1)  #
-        QueenAnt.created += 1
+        Ant.__init__(self, 1)  #
+        self.created= QueenAnt.created
+        if self.created==False:
+            QueenAnt.created=True
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damange of ants
         behind her.  Imposter queens do only one thing: die."""
-        if self.created > 1:
+        if self.created==True:
             self.reduce_armor(self.armor)
-            QueenAnt.created -= 1
         if self.place !=None:
             colony.queen = QueenPlace(colony.queen, self.place)
-
             new = self.place.exit
             while new != None:
                 if new.ant:
