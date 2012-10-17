@@ -1,7 +1,7 @@
 """
 The ants module implements game logic for Ants Vs. SomeBees.
 Name: 
-A:  Vashisht Madhavan
+A: Vashisht Madhavan
 B: Nicholas Osborne Hardison-Moschopoulos
 Login:
 A: CS61a-dt
@@ -88,6 +88,7 @@ class Insect(object):
     
     watersafe = False    ####### VASH MOD ######
     created = 0
+    buffed = False
 
     def __init__(self, armor, place=None):
         """Create an Insect with an armor amount and a starting Place."""
@@ -623,7 +624,10 @@ class QueenAnt(ThrowerAnt):
         new = self.place.exit
         while new != None:
             if new.ant:
-                new.ant.damage = new.ant.damage*2
+                print(new.ant.damage)
+                if new.ant.buffed == False:
+                    new.ant.damage = new.ant.damage*2
+                    new.ant.buffed = True
             new = new.exit
 
         ThrowerAnt.action(self, colony)
