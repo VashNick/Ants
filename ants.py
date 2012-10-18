@@ -40,8 +40,8 @@ class Place(object):
         self.ant = None       # An Ant
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
-        if self.exit != None:   #### MODIFIED
-            self.exit.entrance = self   #### MODIFIED
+        if self.exit != None:
+            self.exit.entrance = self
 
     def add_insect(self, insect):
         """Add an Insect to this Place.
@@ -75,6 +75,9 @@ class Place(object):
         else:
             assert self.ant == insect, '{0} is not in {1}'.format(insect, self)
             if hasattr(insect, 'created') and insect.created == False:
+                return
+            if hasattr(insect, 'container') and insect.container:
+                self.ant = insect.ant
                 return
             self.ant = None
         insect.place = None 
@@ -128,7 +131,7 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
 
     name = 'Bee'
-    watersafe = True   ##### VASH MOD #######
+    watersafe = True
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -166,7 +169,7 @@ class Ant(Insect):
     damage = 0
     food_cost = 0
     blocks_path = True
-    container = False ## MODED
+    container = False 
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -178,7 +181,6 @@ class Ant(Insect):
     def can_contain(self, other):
         if self.container == True and self.ant == None and other.container == False:
             return True
-    ## MODED
 
 
 class HarvesterAnt(Ant):
@@ -186,14 +188,14 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
-    food_cost = 2  #### MODIFIED
+    food_cost = 2
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
 
         colony -- The AntColony, used to access game state information.
         """
-        colony.food += 1  #### MODIFIED
+        colony.food += 1
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -206,9 +208,9 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
-    min_range = 0 ## MODED
-    max_range = 10 ## MODED
-    food_cost = 4 #### MODIFIED
+    min_range = 0 
+    max_range = 10 
+    food_cost = 4 
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -220,14 +222,19 @@ class ThrowerAnt(Ant):
         """
         new = self.place
         for _ in range(0, self.min_range):
-            new = new.entrance
+            if new.name != 'Hive':
+                new = new.entrance 
+            else:
+                break
+                # This is to safeguard against the game
+                # crashing if you place a LongThrower
+                # near the end of the tunnel
         for _ in range(self.min_range, self.max_range+1):
             if new.name != 'Hive':
                 if new.bees:
                     return random_or_none(new.bees)
                 else:
                     new = new.entrance
-        ### MODED
 
     def throw_at(self, target):
         """Throw a leaf at the target Bee, reducing its armor."""
@@ -477,8 +484,6 @@ class Water(Place):
         Place.add_insect(self,insect)
         if not insect.watersafe:
             insect.reduce_armor(insect.armor)
-        ###### VASH MOD ########
-
 
 class FireAnt(Ant):
     """FireAnt cooks any Bee in its Place when it expires."""
@@ -493,14 +498,13 @@ class FireAnt(Ant):
         for x in range(len(temp)):
             temp[x].reduce_armor(self.damage)
         Insect.reduce_armor(self, amount)
-        ####### VASH MOD ######
 
 class LongThrower(ThrowerAnt):
     """A ThrowerAnt that only throws leaves at Bees at least 3 places away."""
 
     name = 'Long'
-    food_cost = 3 #### MODED
-    min_range = 4 ### MODED
+    food_cost = 3 
+    min_range = 4 
     implemented = True
 
 
@@ -508,8 +512,8 @@ class ShortThrower(ThrowerAnt):
     """A ThrowerAnt that only throws leaves at Bees within 3 places."""
 
     name = 'Short'
-    food_cost = 3  #### MODED
-    max_range = 2 ### MODED 
+    food_cost = 3  
+    max_range = 2 
     implemented = True
 
 
@@ -554,17 +558,17 @@ class HungryAnt(Ant):
     While eating, the HungryAnt can't eat another Bee.
     """
     name = 'Hungry'
-    food_cost = 4 ### MODED 
-    implemented = True ### MODED 
-    time_to_digest = 3 ### MODED 
+    food_cost = 4 
+    implemented = True 
+    time_to_digest = 3 
 
     def __init__(self):
         Ant.__init__(self)
-        self.digesting = 0 ## MODED
+        self.digesting = 0 
 
     def eat_bee(self, bee):
         if bee:
-            self.digesting = self.time_to_digest #### MODED
+            self.digesting = self.time_to_digest 
             bee.reduce_armor(bee.armor)
 
     def action(self, colony):
@@ -572,13 +576,12 @@ class HungryAnt(Ant):
             self.digesting -= 1
         else:
             self.eat_bee(random_or_none(self.place.bees))
-        ### MODED
 
 class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
     
     name = 'Bodyguard'
-    food_cost = 4 ## MODED
+    food_cost = 4
     implemented = True
     container = True
 
@@ -603,7 +606,7 @@ class QueenAnt(ThrowerAnt):
     """The Queen of the colony.  The game is over if a bee enters her place."""
 
     name = 'Queen'
-    food_cost = 0
+    food_cost = 2
     created = False
     implemented = True
 
@@ -619,13 +622,11 @@ class QueenAnt(ThrowerAnt):
         if self.created:
             self.reduce_armor(self.armor)
         
-        if self.place != None:
-            ThrowerAnt.action(self, colony)
-            colony.queen = QueenPlace(colony.queen, self.place)
-
         new = self.place
 
         if new != None:
+            ThrowerAnt.action(self, colony)
+            colony.queen = QueenPlace(colony.queen, new)
             new = self.place.exit
 
         while new != None:
